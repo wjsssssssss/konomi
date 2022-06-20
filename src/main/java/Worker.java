@@ -7,12 +7,7 @@ public class Worker extends Thread {
     public Queue<Integer> runningJobsFactory;
     public HashMap<Integer, Job> map;
 
-    public PriorityQueue<Integer> waitingJobs = new PriorityQueue<>(new Comparator<Integer>() {
-        @Override
-        public int compare(Integer o1, Integer o2) {
-            return (int) (map.get(o1).interval - map.get(o2).interval);
-        }
-    });
+    public PriorityQueue<Integer> waitingJobs;
 
     public Worker(Queue<Integer> runningJobsFactory, PriorityQueue<Integer> waitingJobs, HashMap<Integer, Job> map) {
         this.runningJobsFactory = runningJobsFactory;

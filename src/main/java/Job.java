@@ -14,12 +14,7 @@ public class Job extends Thread {
     Integer times;
     Integer interval;
     public Boolean oneTime=true;
-    public PriorityQueue<Integer> waitingJobs = new PriorityQueue<>(new Comparator<Integer>() {
-        @Override
-        public int compare(Integer o1, Integer o2) {
-            return (int) (map.get(o1).interval - map.get(o2).interval);
-        }
-    });
+    public PriorityQueue<Integer> waitingJobs;
     public Job(String content, long causeTime, Integer times, Integer interval, Integer index, Queue<Integer> runningJobsFactory, PriorityQueue<Integer> waitingJobs){
         this.causeTime = causeTime;
         this.times = times;

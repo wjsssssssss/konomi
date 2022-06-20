@@ -2,13 +2,7 @@ import java.util.*;
 
 //Schedule used hashmap to store all the inserted jobs
 public class Schedule {
-    public HashMap<Integer, Job> map = new HashMap<>(10000);
-    public PriorityQueue<Integer> waitingJobs = new PriorityQueue<>(new Comparator<Integer>() {
-        @Override
-        public int compare(Integer o1, Integer o2) {
-            return (int) (map.get(o1).interval - map.get(o2).interval);
-        }
-    });
+    public HashMap<Integer, Job> map;
 
     public Queue<Integer> runningJobsFactory;
     public Schedule(HashMap<Integer, Job> map,Queue<Integer> runningJobsFactory) {
