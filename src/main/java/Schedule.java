@@ -10,9 +10,10 @@ public class Schedule {
         }
     });
 
-    //public BlockingQueue runningJobs = new LinkedBlockingDeque(2);
-    public Schedule(HashMap<Integer, Job> map) {
+    public Queue<Integer> runningJobsFactory;
+    public Schedule(HashMap<Integer, Job> map,Queue<Integer> runningJobsFactory) {
         this.map = map;
+        this.runningJobsFactory = runningJobsFactory;
     }
 
 
@@ -29,7 +30,7 @@ public class Schedule {
         map.put(index, job);
     }
 
-    public void deleteJob(HashMap<Integer, Job> map, Integer index) {
+    public void deleteJob(HashMap<Integer, Job> map, Integer index,Queue<Integer> runningJobsFactory) {
         map.remove(index);
     }
 
@@ -37,12 +38,13 @@ public class Schedule {
 
     public static void main(String args[]) throws InterruptedException {
         HashMap<Integer, Job> testMap = new HashMap<>(1000);
-        Schedule s = new Schedule(testMap);
         Queue<Integer> runningJobF = new LinkedList<>();
-        PriorityQueue<Integer> waitingJobs = new PriorityQueue<Integer>(new Comparator<Job>() {
+        Schedule s = new Schedule(testMap,runningJobF);
+
+        PriorityQueue<Integer> waitingJobs = new PriorityQueue<>(new Comparator<Integer>() {
             @Override
-            public int compare(Job o1, Job o2) {
-                return (int) (o1.interval - o2.interval);
+            public int compare(Integer o1, Integer o2) {
+                return (int) (testMap.get(o1).interval - testMap.get(o2).interval);
             }
         });
         Job job0 = new Job("job0", 20L, 2, 0, 0, runningJobF, waitingJobs);
@@ -57,7 +59,9 @@ public class Schedule {
         Worker worker1 = new Worker(runningJobF, waitingJobs,testMap);
         Worker worker2 = new Worker(runningJobF, waitingJobs,testMap);
         Worker worker3 = new Worker(runningJobF, waitingJobs,testMap);
-
+        s.updateJob(testMap, 1, job3);
+        s.deleteJob(testMap, 1,runningJobF);
+        s.getJob(testMap, 2);
         job0.start();
         job1.start();
         job2.start();
@@ -66,9 +70,7 @@ public class Schedule {
         worker1.start();
         worker2.start();
         worker3.start();
-        s.updateJob(testMap, 1, job3);
-        s.deleteJob(testMap, 1);
-        s.getJob(testMap, 2);
+
     }
 
 

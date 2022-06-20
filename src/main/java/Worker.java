@@ -13,28 +13,28 @@ public class Worker extends Thread {
             return (int) (map.get(o1).interval - map.get(o2).interval);
         }
     });
-    public Worker(Queue<Integer> runningJobsFactory,PriorityQueue<Integer> waitingJobs, HashMap<Integer,Job> map) {
+
+    public Worker(Queue<Integer> runningJobsFactory, PriorityQueue<Integer> waitingJobs, HashMap<Integer, Job> map) {
         this.runningJobsFactory = runningJobsFactory;
         this.waitingJobs = waitingJobs;
         this.map = map;
     }
 
 
-
     @Override
     public void run() {
         while (true) {
             synchronized (runningJobsFactory) {
-                if (runningJobsFactory.size() == 0 &&waitingJobs.size()==0) {
+                if (runningJobsFactory.size() == 0 && waitingJobs.size() == 0) {
                     try {
                         runningJobsFactory.wait(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }else if(waitingJobs.size()!=0){
-                    synchronized (waitingJobs){
+                } else if (waitingJobs.size() != 0) {
+                    synchronized (waitingJobs) {
                         Job job = map.get(waitingJobs.poll());
-                        System.out.println(System.currentTimeMillis()+"waited");
+                        System.out.println(System.currentTimeMillis() + "waited");
                         waitingJobs.notify();
                         try {
                             if (job.times == 1) {
@@ -53,29 +53,35 @@ public class Worker extends Thread {
                         }
                     }
 
-                }
-                else{
-                    Job job = map.get(runningJobsFactory.poll());
-                    runningJobsFactory.notify();
-                    try {
-                        if (job.times == 1) {
-                            job.oneTime();
-                        } else {
-                            int counter = 0;
-                            while (counter < job.times) {
-                                counter++;
+                } else {
+                    int i = runningJobsFactory.poll();
+                    Job job = map.get(i);
+                    if (job == null) {
+                        runningJobsFactory.remove(i);
+                        runningJobsFactory.notify();
+                    } else {
+                        try {
+                            if (job.times == 1) {
                                 job.oneTime();
-                                System.out.println(System.currentTimeMillis());
+                            } else {
+                                int counter = 0;
+                                while (counter < job.times) {
+                                    counter++;
+                                    job.oneTime();
+                                    System.out.println(System.currentTimeMillis());
+                                }
                             }
+                            // 唤醒生产线程
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
                         }
-                        // 唤醒生产线程
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                        runningJobsFactory.notify();
+
                     }
-                }
                 }
                 //消费
 
+            }
         }
     }
 }
