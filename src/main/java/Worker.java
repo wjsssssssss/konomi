@@ -60,6 +60,7 @@ public class Worker extends Thread {
                         runningJobsFactory.remove(i);
                         runningJobsFactory.notify();
                     } else {
+                        runningJobsFactory.notify();
                         try {
                             if (job.times == 1) {
                                 job.oneTime();
@@ -68,6 +69,7 @@ public class Worker extends Thread {
                                 while (counter < job.times) {
                                     counter++;
                                     job.oneTime();
+                                    job.sleep(job.interval);
                                     System.out.println(System.currentTimeMillis());
                                 }
                             }
@@ -75,7 +77,6 @@ public class Worker extends Thread {
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
-                        runningJobsFactory.notify();
 
                     }
                 }
