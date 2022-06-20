@@ -4,8 +4,8 @@ public class Test {
     public static void main(String args[]) throws InterruptedException {
         HashMap<Integer,Job> testMap = new HashMap<>(1000);
         Schedule s = new Schedule(testMap);
-        Queue<Job> runningJobF = new LinkedList<>();
-        PriorityQueue<Job> waitingJobs = new PriorityQueue<>(new Comparator<Job>() {
+        Queue<Integer> runningJobF = new LinkedList<>();
+        PriorityQueue<Integer> waitingJobs = new PriorityQueue<Integer>(new Comparator<Job>() {
             @Override
             public int compare(Job o1, Job o2) {
                 return (int) (o1.interval - o2.interval);

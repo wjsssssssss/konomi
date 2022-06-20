@@ -4,7 +4,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 //if jobs more than 1000, go wait in waitingJobs
 public class Job extends Thread {
-    public Queue<Job> runningJobsFactory;
+    public Queue<Integer> runningJobsFactory;
     public HashMap<Integer,Job> map;
     private int count=0;
     public Integer index;
@@ -14,13 +14,13 @@ public class Job extends Thread {
     Integer times;
     Integer interval;
     public Boolean oneTime=true;
-    public PriorityQueue<Job> waitingJobs = new PriorityQueue<>(new Comparator<Job>() {
+    public PriorityQueue<Integer> waitingJobs = new PriorityQueue<>(new Comparator<Integer>() {
         @Override
-        public int compare(Job o1, Job o2) {
-            return (int) (o1.interval - o2.interval);
+        public int compare(Integer o1, Integer o2) {
+            return (int) (map.get(o1).interval - map.get(o2).interval);
         }
     });
-    public Job(String content, long causeTime, Integer times, Integer interval,Integer index, Queue<Job> runningJobsFactory, PriorityQueue<Job> waitingJobs){
+    public Job(String content, long causeTime, Integer times, Integer interval, Integer index, Queue<Integer> runningJobsFactory, PriorityQueue<Integer> waitingJobs){
         this.causeTime = causeTime;
         this.times = times;
         this.content=content;
@@ -47,7 +47,7 @@ public class Job extends Thread {
 
     @Override
     public void run() {
-        if (runningJobsFactory.size() < 1) {
+        if (runningJobsFactory.size() < 1000) {
             synchronized (runningJobsFactory) {
                 if (runningJobsFactory.size() > 0) {
                     try {
@@ -57,14 +57,14 @@ public class Job extends Thread {
                         e.printStackTrace();
                     }
                 }
-                runningJobsFactory.add(this);
-                System.out.println(System.currentTimeMillis()+"produce"+index);
+                runningJobsFactory.add(this.index);
+                System.out.println(System.currentTimeMillis()+"produce"+this.index);
                 // 生产完毕后 唤醒消费者进行消费
                 runningJobsFactory.notify();
             }
         }else{
             synchronized (waitingJobs){
-                waitingJobs.add(this);
+                waitingJobs.add(this.index);
                 waitingJobs.notify();
                 this.yield();
             }

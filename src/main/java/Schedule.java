@@ -1,6 +1,4 @@
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 //Schedule used hashmap to store all the inserted jobs
 public class Schedule {
@@ -34,90 +32,14 @@ public class Schedule {
     public void deleteJob(HashMap<Integer, Job> map, Integer index) {
         map.remove(index);
     }
-/*
 
-    public void oneTime(Integer index, HashMap<Integer,Job> map) throws InterruptedException {
-        if(runningJobs.size()>2){
-            waitingJobs.add(index);
-        }else {
-            Job job = map.get(index);
-            runningJobs.add(map.get(index));
-            job.oneTime();
-            runningJobs.remove(map.get(index));
-        }
-        }
-
-
-    public void repeat(Integer index,HashMap<Integer,Job> map, Integer times) throws InterruptedException {
-        if (runningJobs.size() > 2) {
-            waitingJobs.add(index);
-        } else {
-            Job job = map.get(index);
-            runningJobs.add(job);
-            int counter = 0;
-            while (counter < times) {
-                counter++;
-                job.oneTime();
-                System.out.println(System.currentTimeMillis());
-                synchronized (job) {
-                    job.wait(job.interval);
-                }
-                synchronized (job) {
-                    job.notify();
-                }
-            }
-
-            runningJobs.remove(job);
-        }
-    }
-
-    public void runJob(Integer index,HashMap<Integer,Job> map) throws InterruptedException {
-        if(map.get(index).times==1){
-            oneTime(index,map);
-        }else{
-            repeat(index,map,map.get(index).times);
-        }
-    }
-    public void retry(){
-        Timer t = new Timer();
-        t.scheduleAtFixedRate(execute(),10,10);
-    }
-    public TimerTask execute() {
-        if(waitingJobs.isEmpty()){
-            return new TimerTask() {
-                @Override
-                public void run() {
-
-                }
-            };
-        }else{
-            System.out.println("retry");
-            return new TimerTask() {
-                @Override
-                public void run() {
-                    //job content
-                    if(waitingJobs!=null){
-                        if(!runningJobs.contains(map.get(waitingJobs.peek()))){
-                            try {
-                                runJob(waitingJobs.poll(),map);
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                    }
-                }
-            };
-        }
-    }
-
-*/
 
 
     public static void main(String args[]) throws InterruptedException {
         HashMap<Integer, Job> testMap = new HashMap<>(1000);
         Schedule s = new Schedule(testMap);
-        Queue<Job> runningJobF = new LinkedList<>();
-        PriorityQueue<Job> waitingJobs = new PriorityQueue<>(new Comparator<Job>() {
+        Queue<Integer> runningJobF = new LinkedList<>();
+        PriorityQueue<Integer> waitingJobs = new PriorityQueue<Integer>(new Comparator<Job>() {
             @Override
             public int compare(Job o1, Job o2) {
                 return (int) (o1.interval - o2.interval);
@@ -132,9 +54,9 @@ public class Schedule {
         s.addJob(testMap, 2, job2);
         s.addJob(testMap, 3, job3);
 
-        Worker worker1 = new Worker(runningJobF, waitingJobs);
-        Worker worker2 = new Worker(runningJobF, waitingJobs);
-        Worker worker3 = new Worker(runningJobF, waitingJobs);
+        Worker worker1 = new Worker(runningJobF, waitingJobs,testMap);
+        Worker worker2 = new Worker(runningJobF, waitingJobs,testMap);
+        Worker worker3 = new Worker(runningJobF, waitingJobs,testMap);
 
         job0.start();
         job1.start();
